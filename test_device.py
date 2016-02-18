@@ -1,5 +1,4 @@
-from requests import put,get
-import json
+from requests import get
 
 while True:
     print get('http://localhost:5000/one',data={'sensor':'temp'}).json()
