@@ -2,6 +2,7 @@ from flask import Flask,request
 from flask_restful import Resource,Api
 import sqlite3
 import json
+import random
 app = Flask(__name__)
 api=Api(app)
 
@@ -16,6 +17,9 @@ def welocome():
 
 class device(Resource):
     def get(self,device_id):
+        # if request.form['sensor']=='temp':
+        #     return json.dumps({"id":"one","state":random.randint(1,20)},sort_keys=True)
+        # else:
         return json.dumps({"id":one['id'],"state":one['state']},sort_keys=True)
 
     def put(self,device_id):
