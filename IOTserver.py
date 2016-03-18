@@ -1,34 +1,46 @@
-from flask import Flask,request
-from flask_restful import Resource,Api
-import sqlite3
+import tornado.httpserver
+import tornado.websocket
+import tornado.ioloop
+import tornado.web
+import socket
+import time
 import json
-import random
-app = Flask(__name__)
-api=Api(app)
+from mongofun import MongoFun 
 
-app.debug=True
+'''
+This is a file that handle is main in IOT communicate project 
+'''
+mongo=MongoFun()
+class WSHandler(tornado.websocket.WebSocketHandler):
+    clients=[]
+    global mongo
+    def open(self):
+        self.clients.append(self)
+        self.device="1wWaItGHJ91EBngTHXet"
+        print("WebSocket opened")
+        
+    def on_message(self, message):
+        print "on message"
+        opinfo=json.loads(message)
+        print opinfo
+        if opinfo['method'] == "put":
+            print opinfo['status']
+            mongo.addDeviceStatus(self.device,opinfo["status"])
+            self.write_message(u"added to database")
+        else:
+            print "methods are not executed"
+    def on_close(self):
+        self.clients.remove(self)
+        print("WebSocket closed")
 
-one={'id': "one",'state':"on"}
-two={'id': "two",'state':"off"}
-temp={}
-@app.route('/')
-def welocome():
-    return '<center>welcome to IOT communicate!</center>'
+application = tornado.web.Application([
+    (r'/ws', WSHandler),
+],debug=True)
 
-class device(Resource):
-    def get(self,device_id):
-        # if request.form['sensor']=='temp':
-        #     return json.dumps({"id":"one","state":random.randint(1,20)},sort_keys=True)
-        # else:
-        return json.dumps({"id":one['id'],"state":one['state']},sort_keys=True)
 
-    def put(self,device_id):
-        if request.method == 'PUT':
-            one[device_id] = request.form['id']
-            one['state'] = request.form['state']
-            return "{\"id\":\""+one['id']+"\",\"state\":\""+one["state"]+"\"}"
-            # return json.dumps({"id":one['id'],"state":one['state']},sort_keys=True)
-
-api.add_resource(device,'/<string:device_id>')
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(8888)
+    myIP = socket.gethostbyname(socket.gethostname())
+    print '*** Websocket Server Started at %s***' % myIP
+    tornado.ioloop.IOLoop.instance().start()
