@@ -1,8 +1,9 @@
 import pymongo
 from pymongo import MongoClient
-from bson import BSON
-from bson import json_util
 import json
+from bson.objectid import ObjectId
+import random
+import string
 
 class MongoFun:
    
@@ -34,30 +35,51 @@ class MongoFun:
 	self.db['users'].insert(userData,safe=True)
         print "user is successfully inserted"
 
-    def addDevice(self,email,DeviceData):
+    def addDevice(self,id,DeviceData):
         """function take 2 arguments email or id and DaviceData that genrated on main file
            ->first devices added to user.devices after,
            ->then create deivice database with deviceId
            ->assign fake data for to make collection
            ->in DeviceData there is two Field deviceid and devicekey"""
-        self.db['users'].update({"email":email},{"$push":{"devices":DeviceData}})
+        self.db['users'].update({"_id":ObjectId(id)},{"$push":{"devices":DeviceData}})
+        self.db.create_collection(DeviceData['deviceid'],size=1000000,max=100,capped=True)
         fakeData={"sensor":"temp","value":20}
         self.db[DeviceData['deviceid']].insert(fakeData,safe=True)     
 
     def verifyDevice(self,deviceid,devicekey):
 
         """function taking key and id as argument and if match than return true"""
-        userinfo=self.db['users'].find({'devices.deviceid':deviceid})
-        userinfo=json.loads(str(userinfo))
-        print userinfo
-        if userinfo['devices'][9].devicekey==devicekey:
-            return 1
-        else:
-            return 0
+        userinfo=self.db['users'].find({"devices":{"$elemMatch":{"deviceid": deviceid}}})
+        for document in userinfo: 
+            length=len(document['devices'])
+            for i in range(length):
+                if document['devices'][i]['devicekey']==devicekey and document['devices'][i]['deviceid']==deviceid:
+                    return 1
+                else:
+                    return 0
+
+    def verifyUser(self,uname,pword):
+        """ verify thae user with two parameter 1.username 2.password
+        and if password is correct for username than return id if wrong retrun 0"""
+        userinfo=self.db['users'].find({"email":uname})
+        for document in userinfo:
+            if document['email']==uname and document['pass']==pword:
+                return document['_id']
+            else:
+                return "nid"
+
 
     def addDeviceStatus(self,device,status):
         """this function is add status to database when user submit data in websocket connection"""
         self.db[device].insert(status,safe=True)  
+
+    def randomGen(self,size,chars=string.ascii_uppercase+string.digits):
+        return ''.join(random.choice(chars) for x in range(size))
+
+    def listDevices(self,id):
+        userinfo=self.db['users'].find_one({"_id":ObjectId(id)})
+        return userinfo['devices']
+
         
 
     
@@ -73,7 +95,8 @@ if __name__ == '__main__':
     print mongofun.GetCollection()
 
     #test add user in users database
-    userData={"email":"patelaniket165@gmail.com",
+    userData={ "name":"aniket patel",
+              "email":"patelaniket165@gmail.com",
               "password":"!!@@##apAP90",
               "devices":[]
              }
