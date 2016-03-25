@@ -2,6 +2,7 @@ import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
+
 import socket
 import time
 import json
@@ -10,9 +11,10 @@ import os
 import pymongo
 from pymongo import MongoClient
 from mongofun import MongoFun 
+from bson.objectid import ObjectId
 
 import thread
-from bson.objectid import ObjectId
+
 
 
 '''
@@ -139,7 +141,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             while self.cursor.alive:
                 try:
                     doc = self.cursor.next()
-                    self.write_message("from server")
+                    self.write_message("\nfrom server\n")
                     self.write_message(str(doc))
                 except StopIteration:
                     time.sleep(2) 
