@@ -24,6 +24,7 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.get_secure_cookie("user")
 
 class MainHandler(BaseHandler):
+    '''main handler check cookie if not valid than redirect to login'''
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -34,6 +35,7 @@ class MainHandler(BaseHandler):
 
 
 class CreateHandler(BaseHandler):
+    '''handler that create new devices with only by passing name in argument'''
     mongo=MongoFun()
     @tornado.web.authenticated
     def get(self):
@@ -57,11 +59,13 @@ class CreateHandler(BaseHandler):
 
 
 class LogoutHandler(BaseHandler):
+    '''for logout'''
     def get(self):
         self.clear_cookie("user")
         self.redirect("/login")      
 
 class LoginHandler(BaseHandler):
+    '''login handler'''
     mongo=MongoFun()
     def get(self):
         if self.current_user:
@@ -85,6 +89,7 @@ class LoginHandler(BaseHandler):
             self.redirect("/login")
 
 class MydeviceHandler(BaseHandler):
+    '''my devices give list of devices that you created'''
     mongo=MongoFun()
     @tornado.web.authenticated
     def get(self):
@@ -96,6 +101,7 @@ class MydeviceHandler(BaseHandler):
         self.render("mydevice.html",mydevices=devicelist)
 
 class  signUpHandler(tornado.web.RequestHandler):
+
     mongo=MongoFun()
     def get(self):
         self.render('signup.html')
@@ -125,7 +131,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.clients.append(self)
         self.conn = MongoClient('mongodb://localhost:27017/')
         self.db = self.conn['IOT']
-            # self.db.create_collection(self.device,size=1000000,max=100,capped=True)
+        # self.db.create_collection(self.device,size=1000000,max=100,capped=True)
         self.coll = self.db[self.device]
         self.cursor = self.coll.find({"time":{"$gt":time.time()}},await_data=True,tailable=True)
         # self.write_message("conn opened") 
@@ -144,7 +150,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print "on message"
         #method put test query "{"method":"put","status":{"write" : "device","sensor" : "temp","value" : 20}}"
         opinfo=json.loads(message)
-        #print opinfo
+
         print self.device
         if opinfo['method'] == "put":
             #print opinfo['status']
@@ -166,9 +172,9 @@ settings = {
 }
 
 application = tornado.web.Application(handlers=[
-    (r'/ws', WSHandler),
     (r'/',MainHandler),
-    ('/login',LoginHandler),
+    (r'/ws', WSHandler),
+    (r'/login',LoginHandler),
     (r'/logout', LogoutHandler),
     (r'/create', CreateHandler),
     (r'/mydevices', MydeviceHandler),
