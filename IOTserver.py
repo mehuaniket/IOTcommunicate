@@ -6,9 +6,11 @@ import socket
 import time
 import json
 import os
-from mongofun import MongoFun 
+
 import pymongo
 from pymongo import MongoClient
+from mongofun import MongoFun 
+
 import thread
 from bson.objectid import ObjectId
 
@@ -28,9 +30,7 @@ class MainHandler(BaseHandler):
             self.redirect("/login")
             return
         user=tornado.escape.xhtml_escape(self.current_user)
-        self.write("hello %s"%id)
-        self.write("<a href=\"/logout\">logout</a></br>")
-        self.write("<a href=\"/create\">create new device</a>")
+        self.render("home.html",user=user)
 
 
 class CreateHandler(BaseHandler):
@@ -52,6 +52,7 @@ class CreateHandler(BaseHandler):
         DeviceData={"name":self.dname,"deviceid":self.did,"devicekey":self.dkey}
         mongo.addDevice(self.id,DeviceData)
         self.write("devcie added to %s"%self.id)
+        self.redirect("/mydevices")
 
 
 
