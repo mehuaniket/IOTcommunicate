@@ -15,7 +15,8 @@ from bson.objectid import ObjectId
 
 import thread
 
-
+clients=[]
+eventinject={}
 
 '''
 This is a file that handle is main in IOT communicate project 
@@ -36,7 +37,7 @@ class MainHandler(BaseHandler):
 
 class CreateHandler(BaseHandler):
     '''handler that create new devices with only by passing name in argument'''
-    mongo=MongoFun()
+    # mongo=MongoFun()
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -65,7 +66,7 @@ class LogoutHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     '''login handler'''
-    mongo=MongoFun()
+    # mongo=MongoFun()
     def get(self):
         if self.current_user:
             self.redirect("/")
@@ -89,7 +90,7 @@ class LoginHandler(BaseHandler):
 
 class MydeviceHandler(BaseHandler):
     '''my devices give list of devices that you created'''
-    mongo=MongoFun()
+    # mongo=MongoFun()
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -101,7 +102,7 @@ class MydeviceHandler(BaseHandler):
 
 class DocsHandler(BaseHandler):
     '''provide docs to user'''
-    mongo=MongoFun()
+    # mongo=MongoFun()
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -130,16 +131,20 @@ class  signUpHandler(tornado.web.RequestHandler):
 
         
 class WSHandler(tornado.websocket.WebSocketHandler):
-    clients=[]
-    mongo=MongoFun()
+
+    # mongo=MongoFun()
     def open(self):
         global mongo
-        self.clients.append(self)
+        global clients
+        global eventinject
+        clients.append(self)
         self.device=self.get_argument('device',True)
         self.key=self.get_argument('key',True)
+        print self.device
+        print self.key
+        print "from function in mongodb",mongo.verifyDevice(self.device,self.key)
         if mongo.verifyDevice(self.device,self.key)==0:
             self.close()
-        self.clients.append(self)
         self.conn = MongoClient('mongodb://localhost:27017/')
         self.db = self.conn['IOT']
         # self.db.create_collection(self.device,size=1000000,max=100,capped=True)
@@ -150,19 +155,19 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             while self.cursor.alive:
                 try:
                     doc = self.cursor.next()
-                    self.write_message("\nfrom server\n")
-                    self.write_message(str(doc))
+                    if doc['write'] != "device":
+                        self.write_message("\nfrom server\n")
+                        self.write_message(str(doc))
                 except StopIteration:
                     time.sleep(2) 
-        self.eventinject=thread.start_new_thread(run, ()) 
+        eventinject[self]=thread.start_new_thread(run, ()) 
 
         
     def on_message(self, message):
         print "on message"
         #method put test query "{"method":"put","status":{"write" : "device","sensor" : "temp","value" : 20}}"
         opinfo=json.loads(message)
-
-        print self.device
+        print "from on_message function",self.device
         if opinfo['method'] == "put":
             #print opinfo['status']
             mongo.addDeviceStatus(self.device,opinfo["status"])
@@ -170,7 +175,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         else:
             print "methods are not executed"
     def on_close(self):
-        self.clients.remove(self)
+        clients.remove(self)
+        del eventinject[self]
         print("WebSocket closed")
 
 settings = {

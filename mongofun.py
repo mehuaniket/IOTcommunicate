@@ -49,14 +49,18 @@ class MongoFun:
     def verifyDevice(self,deviceid,devicekey):
 
         """function taking key and id as argument and if match than return true"""
-        userinfo=self.db['users'].find({"devices":{"$elemMatch":{"deviceid": deviceid}}})
-        for document in userinfo: 
-            length=len(document['devices'])
-            for i in range(length):
-                if document['devices'][i]['devicekey']==devicekey and document['devices'][i]['deviceid']==deviceid:
-                    return 1
-                else:
-                    return 0
+        document=self.db['users'].find_one({"devices":{"$elemMatch":{"deviceid": deviceid,"devicekey":devicekey}}})
+        # for document in userinfo: 
+        length=len(document['devices'])
+        if document:
+            return 1
+        else:
+            return 0
+        # for i in range(length):
+        #     if document['devices'][i]['devicekey']==devicekey and document['devices'][i]['deviceid']==deviceid:
+        #         return 1
+        #     else:
+        #         return 0
 
     def verifyUser(self,uname,pword):
         """ verify thae user with two parameter 1.username 2.password
