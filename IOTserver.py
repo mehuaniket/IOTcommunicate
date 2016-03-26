@@ -32,9 +32,7 @@ class MainHandler(BaseHandler):
         if not self.current_user:
             self.redirect("/login")
             return
-        user=tornado.escape.xhtml_escape(self.current_user)
-        self.render("home.html",user=user)
-
+        self.redirect('/mydevices')
 
 class CreateHandler(BaseHandler):
     '''handler that create new devices with only by passing name in argument'''
@@ -55,7 +53,6 @@ class CreateHandler(BaseHandler):
         self.dkey=mongo.randomGen(size=15)
         DeviceData={"name":self.dname,"deviceid":self.did,"devicekey":self.dkey}
         mongo.addDevice(self.id,DeviceData)
-        self.write("devcie added to %s"%self.id)
         self.redirect("/mydevices")
 
 
@@ -100,7 +97,19 @@ class MydeviceHandler(BaseHandler):
             return
         self.id=self.current_user
         devicelist=mongo.listDevices(self.id)
-        self.render("mydevice.html",mydevices=devicelist)
+        self.render("home.html",mydevices=devicelist)
+
+class DocsHandler(BaseHandler):
+    '''provide docs to user'''
+    mongo=MongoFun()
+    @tornado.web.authenticated
+    def get(self):
+        if not self.current_user:
+            self.redirect("/login")
+            return
+        self.id=self.current_user
+        self.render("docs.html")
+
 
 class  signUpHandler(tornado.web.RequestHandler):
 
@@ -174,6 +183,7 @@ settings = {
 }
 
 application = tornado.web.Application(handlers=[
+    (r'/docs',DocsHandler),
     (r'/',MainHandler),
     (r'/ws', WSHandler),
     (r'/login',LoginHandler),

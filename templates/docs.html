@@ -35,7 +35,7 @@
 <body>
 
 <div class="wrapper">
-    <div class="sidebar" data-color="azure" data-image="static/img/sidebar-2.jpg">
+    <div class="sidebar" data-color="orange" data-image="static/img/sidebar-2.jpg">
 
     <!--
 
@@ -52,8 +52,8 @@
             </div>
 
             <ul class="nav">
-                <li class="active">
-                    <a href="/mydevices">
+                <li>
+                    <a href="/mydevices" method="POST">
                         <i class="pe-7s-vector"></i>
                         <p>My Devices</p>
                     </a>
@@ -64,7 +64,7 @@
                         <p>New Devices</p>
                     </a>
                 </li>
-                <li>
+                <li class="active">
                     <a href="docs">
                         <i class="pe-7s-news-paper"></i>
                         <p>Documentation</p>
@@ -100,39 +100,24 @@
             </div>
         </nav>
 
- <div class="content">
+        <div class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-8">
                         <div class="card">
                             <div class="header">
-                               <h4 class="title">My Devices</h4>
-                               <p class="category">Here is your deviceid and device authkey</p>
+                                <h4 class="title">IOT communicate</h4>
+                                <p class="category">ready to make IOT things easily </p>
                             </div>
-                            <div class="content table-responsive table-full-width">
-                                <table class="table table-hover table-striped">
-                                    <thead>
-                                        <th>devcie name</th>
-                                    	<th>davice id</th>
-                                    	<th>device key</th>
-                                    </thead>
-                                    <tbody>
-                                    {%for doc in mydevices %}
-                                        <tr>
-                                        	<td>{{doc['name']}}</td>
-                                        	<td>{{doc['deviceid']}}</td>
-                                        	<td>{{doc['devicekey']}}</td>
-                                        </tr>
-                                    {%end%} 
-                                    </tbody>
-                                </table>
-
+                            <div class="content">
+                               
                             </div>
                         </div>
                     </div>
-                  </div>
+                 </div>
             </div>
 </div>
+
 
 </body>
 
@@ -159,3 +144,4 @@
 	<script src="static/js/demo.js"></script>
 
 </html>
+
