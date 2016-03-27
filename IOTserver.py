@@ -77,11 +77,10 @@ class LoginHandler(BaseHandler):
         global mongo
         self.uname=self.get_argument('uname',True)
         self.pword=self.get_argument('pword',True)
-        print self.uname
-        print self.pword
+        print "[notify]login from",self.uname
         id=str(mongo.verifyUser(self.uname,self.pword))
-        print id
-        print type(id)
+        print "[info]user loggedin",id
+  
         if id is not "nid":
             self.set_secure_cookie("user",id)
             self.redirect("/")
@@ -140,9 +139,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         clients.append(self)
         self.device=self.get_argument('device',True)
         self.key=self.get_argument('key',True)
-        print self.device
-        print self.key
-        print "from function in mongodb",mongo.verifyDevice(self.device,self.key)
+        print "[notify]connection established",self.device
+        print "[notify]from function in mongodbveriy",mongo.verifyDevice(self.device,self.key)
         if mongo.verifyDevice(self.device,self.key)==0:
             self.close()
         self.conn = MongoClient('mongodb://localhost:27017/')
@@ -156,7 +154,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 try:
                     doc = self.cursor.next()
                     if doc['write'] != "device":
-                        self.write_message("\nfrom server\n")
                         self.write_message(str(doc))
                 except StopIteration:
                     time.sleep(2) 
@@ -164,20 +161,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
         
     def on_message(self, message):
-        print "on message"
         #method put test query "{"method":"put","status":{"write" : "device","sensor" : "temp","value" : 20}}"
         opinfo=json.loads(message)
-        print "from on_message function",self.device
+        print "[info]message received from",self.device
         if opinfo['method'] == "put":
-            #print opinfo['status']
             mongo.addDeviceStatus(self.device,opinfo["status"])
-            self.write_message(u"added to database")
+            self.write_message(u"from server added to database")
         else:
-            print "methods are not executed"
+            print "[fail]methods are not executed"
     def on_close(self):
         clients.remove(self)
         del eventinject[self]
-        print("WebSocket closed")
+        print("[notify]WebSocket closed")
 
 settings = {
 "template_path": os.path.join(os.path.dirname(__file__), "templates"),

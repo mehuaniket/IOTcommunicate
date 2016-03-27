@@ -51,7 +51,6 @@ class MongoFun:
         """function taking key and id as argument and if match than return true"""
         document=self.db['users'].find_one({"devices":{"$elemMatch":{"deviceid": deviceid,"devicekey":devicekey}}})
         # for document in userinfo: 
-        length=len(document['devices'])
         if document:
             return 1
         else:

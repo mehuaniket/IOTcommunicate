@@ -2,12 +2,12 @@
 - following is structure of mongodb database that is very easy to understand 
 
 ```
-+---------+                +----------+
-|device id|================|   temp   |->values
-+---------+                +----------+
-         ||                +-----------+
-         ||================|   led     |->values
-         ||                +-----------+
++---------+                +------------+
+|device id|================|    temp    |->values
++---------+                +------------+
+         ||                +------------+
+         ||================|    led     |->values
+         ||                +------------+
          ||================|other sensor|> 
 
 
