@@ -23,6 +23,7 @@ This is a file that handle is main in IOT communicate project
 '''
 mongo=MongoFun()
 class BaseHandler(tornado.web.RequestHandler):
+    """base handler no more use than fetch current user"""
     def get_current_user(self):
         return self.get_secure_cookie("user")
 

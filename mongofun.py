@@ -71,11 +71,12 @@ class MongoFun:
     def verifyUser(self,uname,pword):
         """ verify thae user with two parameter 1.username 2.password
         and if password is correct for username than return id if wrong retrun 0"""
-        userinfo=self.db['users'].find_one({"email":uname,"pass":pword})
-        if userinfo == None:
-            return str(userinfo["_id"])
-        else:
-            return "nid"
+        userinfo=self.db['users'].find({"email":uname})
+        for document in userinfo:
+            if document['email']==uname and document['pass']==pword:
+                return document['_id']
+            else:
+                return "nid"
 
 
     def addDeviceStatus(self,device,status):
@@ -95,8 +96,7 @@ class MongoFun:
 
     def listDevices(self,id):
         userinfo=self.db['users'].find_one({"_id":ObjectId(id)})
-        del userinfo["_id"]
-        return json.dumps(userinfo['devices'])
+        return userinfo['devices']
 
         
 
