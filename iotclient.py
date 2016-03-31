@@ -13,7 +13,8 @@ def writebysign(write,sensor,value):
     global query
     info=True
     setDeviceStatus(sensor,value)
-    return ('{"method":"put","status":{"time":%d,"write":"%s","sensor" : "%s","value" : %d}}'%(time.time(),write,sensor,value))
+    tempq={"method":"put","status":{"sensor" :sensor,"value" :value}}
+    return json.dumps(tempq)
 
 def setDeviceStatus(sens,value):
     global sensor
@@ -46,10 +47,10 @@ def on_open(ws):
                 ws.send(query)
                 info=False
             else:
-                value=int(raw_input('enter value of sensor=>\n'))
+                value=raw_input('enter value of sensor=>\n')
                 sensor=raw_input('enter sensor id=>\n')
-                write="client"
-                query=str(writebysign(write,sensor,value))
+                write="device"
+                query=writebysign(write,sensor,value)
 
 
             time.sleep(5)
@@ -62,3 +63,4 @@ if __name__ == "__main__":
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()
+

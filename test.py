@@ -1,18 +1,24 @@
-from mongofun import MongoFun 
-import pymongo
-from pymongo import MongoClient
-import time
-from bson.objectid import ObjectId
-import json
-conn = MongoClient('mongodb://localhost:27017/')
-db = conn['IOT']
-coll=db['BCDMNQ15YUG5HG9O6OQG']
-deviceid= "BCDMNQ15YUG5HG9O6OQG"
-devicekey="asdfghjklasdkghjk"
+doc={}
+doc["state"]="git"
+doc["bare"]="me"
+print doc
 
-status= coll.find("_id":ObjectId()).limit(1).sort([["time",pymongo.DESCENDING]])
-for stat in status:
-	print str(stat)
+
+# from mongofun import MongoFun 
+# import pymongo
+# from pymongo import MongoClient
+# import time
+# from bson.objectid import ObjectId
+# import json
+# conn = MongoClient('mongodb://localhost:27017/')
+# db = conn['IOT']
+# coll=db['BCDMNQ15YUG5HG9O6OQG']
+# deviceid= "BCDMNQ15YUG5HG9O6OQG"
+# devicekey="asdfghjklasdkghjk"
+
+# status= coll.find("_id":ObjectId()).limit(1).sort([["time",pymongo.DESCENDING]])
+# for stat in status:
+# 	print str(stat)
 
 # userinfo=db['users'].find({"devices":{"$elemMatch":{"deviceid" : "1wWaItGHJ91EBngTHXet"}}})
 # userinfo=db['users'].find({"devices":{"$elemMatch":{"deviceid": "1wWaItGHJ91EBngTHXet"}}})

@@ -14,7 +14,7 @@ from mongofun import MongoFun
 from bson.objectid import ObjectId
 
 import thread
-
+import time
 clients=[]
 eventinject={}
 
@@ -136,7 +136,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         global mongo
         global clients
-        global eventinject
+
         clients.append(self)
         self.device=self.get_argument('device',True)
         self.key=self.get_argument('key',True)
@@ -156,28 +156,35 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                     doc = self.cursor.next()
                     del doc["_id"]
                     if doc["write"]!=self.side:
-                        self.write_message("\n==========from server========\n")
+                        self.write_message("\n========from server========\n")
                         self.write_message(json.dumps(doc))
                 except StopIteration:
                     time.sleep(2) 
         self.eventinject=thread.start_new_thread(run, ()) 
-        # eventinject[self]=thread.start_new_thread(run, ()) 
+        
 
         
     def on_message(self, message):
-        #method put test query "{"method":"put","status":{"write" : "device","sensor" : "temp","value" : 20}}"
+        
         opinfo=json.loads(message)
+
         print "[info]message received from",self.device
         if opinfo['method'] == "put":
+            opinfo["status"]["time"]=time.time()
+            opinfo["status"]["write"]=self.side
             mongo.addDeviceStatus(self.device,opinfo["status"])
             self.write_message(u"from server added to database")
+
         elif opinfo['method']=="gets":
+
             self.write_message(mongo.getDeviceStatus(self.device,opinfo['sensor']))
+
         else:
+
             print "[fail]methods are not executed"
     def on_close(self):
+
         clients.remove(self)
-        del eventinject[self]
         print("[notify]WebSocket closed")
 
 settings = {

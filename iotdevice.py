@@ -13,7 +13,8 @@ def writebysign(write,sensor,value):
     global query
     info=True
     setDeviceStatus(sensor,value)
-    return ('{"method":"put","status":{"time":%d,"write":"%s","sensor" : "%s","value" : %d}}'%(time.time(),write,sensor,value))
+    tempq={"method":"put","status":{"sensor" :sensor,"value" :value}}
+    return json.dumps(tempq)
 
 def setDeviceStatus(sens,value):
     global sensor
@@ -36,7 +37,6 @@ def on_close(ws):
     print "[notify] connection closed"
 
 def on_open(ws):
-    ws.send("{\"method\":\"gets\",\"sensor\":\"temp\"}")
     def run(*args):
         global query
         global info
@@ -46,10 +46,10 @@ def on_open(ws):
                 ws.send(query)
                 info=False
             else:
-                value=int(raw_input('enter value of sensor=>\n'))
+                value=raw_input('enter value of sensor=>\n')
                 sensor=raw_input('enter sensor id=>\n')
                 write="device"
-                query=str(writebysign(write,sensor,value))
+                query=writebysign(write,sensor,value)
 
 
             time.sleep(5)

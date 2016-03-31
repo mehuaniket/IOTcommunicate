@@ -106,38 +106,70 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="header">
-                                <h4 class="title">IOT communicate</h4>
-                                <p class="category">ready to make IOT things easily </p>
+                                <h2 class="title">IOT communicate</h2>
+                                <p class="category">ready to make IOT things easily and documentation is waiting for you to read out</p>
                             </div>
+
                             <div class="content">
                                <div class="row">
                                         <div class="col-md-12">
                                             <h3>How to Start?</h3>
-                                            <p>first thing first make new device from <a href="create">new devices</a> tab and than copy auth details.paste device-id and device-key in following url in place of.<br></p>
-                                            <code>
-                                                 ws://localhost:8888/ws?device=DEVICE-ID&key=DEVICE-KEY
-                                            </code>
-                                            <h3>Give me exmple</h3>
-                                            <code><pre>
+                                            <p>first thing first make new device from <a href="create">new devices</a> tab and than copy auth details.paste device-id ,device-key in following url in place of and don't forget to add side properly this is the best helper for everyone.<br></p>
+                                            <pre class="text-primary">
+
+ws://localhost:8888/ws?device=DEVICE-ID&key=DEVICE-KEY&side=(device|client)
+                                            </pre>
+                                            <h3>what is about parameter in URL?</h3>
+                                            <p>
+                                            first parameter in the url is <B>DEVICE-ID</B> that is your device unique id to fit in our database this like card to us.second parameter <b>DEVICE-KEY</b> is all for security purpose that used every time you want to upload the status of device or change device status you need this key first!!<br>
+                                            about third is <b>SIDE</b> is somthing like give identity or who are you device or client.we make that diffrence because IOT devices have two use on is is device itself and second is one who like to change status of the device and that help us to deleiver information to other side.
+                                            </p>
+                                            <h3>Why should i use it?</h3>
+                                            <p>good question,first bold point about this product is we give full imunity to put and get data whatever you want we never limit you to do that best part is we are using mongodb and if you are developer you are bit familiar with that also plus point of that dataase is there is no scema like structure that is become most importand for you and us</p></br>
+                                            <p>
+                                            and we using tornado framework,mongodb websocket in perfect way that you get full scalable environment that you can make small project from remote led tur on-off to fully home automation products!!
+                                            </p>
+                                            <h3>Okk,that's enough,Give me exmple</h3>
+                                            <p>following example is making you understand all in and out of about how you can send and receive information and apply to sensors for your own purpose</p>
+                                            <pre>
 import websocket
 import thread
 import time
 import sys
+import json
+
 
 info=False
 query={}
+sensor={}
 def writebysign(write,sensor,value):
     global info
     global query
     info=True
-    return ('{"method":"put","status":{"time":%d,"write":"%s","sensor" : "%s",
-                   "value" : %d}}'%(time.time(),write,sensor,value))
+    setDeviceStatus(sensor,value)
+    tempq={"method":"put","status":{"sensor" :sensor,"value" :value}}
+    return json.dumps(tempq)
+
+def setDeviceStatus(sens,value):
+    global sensor
+    sensor[sens]=value
+    print "==========================\n"
+    for key in sensor.keys():
+        print "sensor=",key," status=",sensor[key]
+    print "==========================\n"
+
 def on_message(ws, message):
-    print "[info]from message function:",message
+    global sensor
+    print "[info]from message function:",str(message)
+    statinfo=json.loads(message)
+    setDeviceStatus(statinfo['sensor'],statinfo['value'])
+
 def on_error(ws, error):
     print(error)
+
 def on_close(ws):
     print "[notify] connection closed"
+
 def on_open(ws):
     def run(*args):
         global query
@@ -148,10 +180,10 @@ def on_open(ws):
                 ws.send(query)
                 info=False
             else:
-                value=int(raw_input('enter value of temp=>'))
-                sensor=raw_input('enter sensor id=>')
-                write=raw_input('enter sign=>')
-                query=str(writebysign(write,sensor,value))
+                value=raw_input('enter value of sensor=>\n')
+                sensor=raw_input('enter sensor id=>\n')
+                write="device"
+                query=writebysign(write,sensor,value)
 
 
             time.sleep(5)
@@ -160,11 +192,11 @@ def on_open(ws):
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
     websocket.enableTrace(False)
-    host = "ws://localhost:8888/ws?device=DEVICE-ID&key=DEVICE-KEY"
+    host = "ws://localhost:8888/ws?device=DEVICE-ID&key=DEVICE-KEY&side=(device|client)"
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()
-                                            </pre></code>
+                                            </pre>
                                         </div>
                                     </div>
                             </div>
@@ -174,7 +206,14 @@ if __name__ == "__main__":
             </div>
 </div>
 
-
+ <footer class="footer">
+            <div class="container-fluid">
+             
+                <p class="copyright pull-right">
+                    &copy; 2016 <a href="www.github.com/ceaniket">Aniket Patel</a>, made with love for small thing that next big thing:)
+                </p>
+            </div>
+        </footer>
 </body>
 
     <!--   Core JS Files   -->

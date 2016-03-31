@@ -1,21 +1,16 @@
 import pymongo
 from pymongo import MongoClient
-import json
 from bson.objectid import ObjectId
+
+import json
 import random
 import string
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
-
 
 class MongoFun:
    
     def __init__(self):
         """this function making connection to database"""
+        
         try:
             self.conn = MongoClient('mongodb://localhost:27017/')
         except ConnectionFailure,e:
@@ -26,19 +21,23 @@ class MongoFun:
     
     def FetchDbNames(self):
         """this function giving you all database name"""
+
         return self.conn.database_names()
     
     def SwitchDb(self,database):
         """this function is switching connection of database one-to other"""
+
         self.db=self.conn[database]
         print "you are currently on ",database
 
     def GetCollection(self):
         """this database give you database collection names and that is really important"""
+
         return self.db.collection_names()
      
     def addUser(self,userData):
         """this function is used when we have to insert new user"""
+
 	self.db['users'].insert(userData,safe=True)
         print "user is successfully inserted"
 
@@ -48,6 +47,7 @@ class MongoFun:
            ->then create deivice database with deviceId
            ->assign fake data for to make collection
            ->in DeviceData there is two Field deviceid and devicekey"""
+
         self.db['users'].update({"_id":ObjectId(id)},{"$push":{"devices":DeviceData}})
         self.db.create_collection(DeviceData['deviceid'],size=1000000,max=100,capped=True)
         fakeData={"sensor":"temp","value":20}
@@ -56,8 +56,9 @@ class MongoFun:
     def verifyDevice(self,deviceid,devicekey):
 
         """function taking key and id as argument and if match than return true"""
+
         document=self.db['users'].find_one({"devices":{"$elemMatch":{"deviceid": deviceid,"devicekey":devicekey}}})
-        # for document in userinfo: 
+ 
         if document:
             return 1
         else:
@@ -71,6 +72,7 @@ class MongoFun:
     def verifyUser(self,uname,pword):
         """ verify thae user with two parameter 1.username 2.password
         and if password is correct for username than return id if wrong retrun 0"""
+
         userinfo=self.db['users'].find({"email":uname})
         for document in userinfo:
             if document['email']==uname and document['pass']==pword:
@@ -80,11 +82,13 @@ class MongoFun:
 
 
     def addDeviceStatus(self,device,status):
-        """this function is add status to database when user submit data in websocket connection"""
+        """this function is add status to database when user submit data 
+           in websocket connection"""
         self.db[device].insert(status,safe=True)  
 
     def getDeviceStatus(self,device,sensor):
         """get you a last status about the sensor"""
+
         status= self.db[device].find({"sensor":sensor}).limit(1).sort([["time",pymongo.DESCENDING]])
         for stat in status:
             del stat["_id"]
@@ -92,6 +96,8 @@ class MongoFun:
             break
 
     def randomGen(self,size,chars=string.ascii_uppercase+string.digits):
+        """this function give randomize keys size that you passed to it"""
+
         return ''.join(random.choice(chars) for x in range(size))
 
     def listDevices(self,id):
