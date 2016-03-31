@@ -146,7 +146,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             self.close()
         self.conn = MongoClient('mongodb://localhost:27017/')
         self.db = self.conn['IOT']
-        # self.db.create_collection(self.device,size=1000000,max=100,capped=True)
         self.coll = self.db[self.device]
         self.cursor = self.coll.find({"time":{"$gt":time.time()}},await_data=True,tailable=True)
         # self.write_message("conn opened") 
@@ -154,11 +153,14 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             while self.cursor.alive:
                 try:
                     doc = self.cursor.next()
-                    if doc['write'] != self.side:
-                        self.write_message(doc)
+                    del doc["_id"]
+                    if doc["write"]!=self.side:
+                        self.write_message("\n==========from server========\n")
+                        self.write_message(json.dumps(doc))
                 except StopIteration:
                     time.sleep(2) 
-        eventinject[self]=thread.start_new_thread(run, ()) 
+        self.eventinject=thread.start_new_thread(run, ()) 
+        # eventinject[self]=thread.start_new_thread(run, ()) 
 
         
     def on_message(self, message):

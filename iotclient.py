@@ -27,8 +27,6 @@ def on_message(ws, message):
     global sensor
     print "[info]from message function:",str(message)
     statinfo=json.loads(message)
-    print statinfo
-    print "test",statinfo['sensor']
     setDeviceStatus(statinfo['sensor'],statinfo['value'])
 
 def on_error(ws, error):

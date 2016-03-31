@@ -2,21 +2,41 @@ import websocket
 import thread
 import time
 import sys
+import json
+
 
 info=False
 query={}
+sensor={}
 def writebysign(write,sensor,value):
     global info
     global query
     info=True
+    setDeviceStatus(sensor,value)
     return ('{"method":"put","status":{"time":%d,"write":"%s","sensor" : "%s","value" : %d}}'%(time.time(),write,sensor,value))
+
+def setDeviceStatus(sens,value):
+    global sensor
+    sensor[sens]=value
+    print "==========================\n"
+    for key in sensor.keys():
+        print "sensor=",key," status=",sensor[key]
+    print "==========================\n"
+
 def on_message(ws, message):
-    print "[info]from message function:",message
+    global sensor
+    print "[info]from message function:",str(message)
+    statinfo=json.loads(message)
+    setDeviceStatus(statinfo['sensor'],statinfo['value'])
+
 def on_error(ws, error):
     print(error)
+
 def on_close(ws):
     print "[notify] connection closed"
+
 def on_open(ws):
+    ws.send("{\"method\":\"gets\",\"sensor\":\"temp\"}")
     def run(*args):
         global query
         global info
