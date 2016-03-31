@@ -139,6 +139,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         clients.append(self)
         self.device=self.get_argument('device',True)
         self.key=self.get_argument('key',True)
+        self.side=self.get_argument('side',True)
         print "[notify]connection established",self.device
         print "[notify]from function in mongodbveriy",mongo.verifyDevice(self.device,self.key)
         if mongo.verifyDevice(self.device,self.key)==0:
@@ -153,8 +154,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             while self.cursor.alive:
                 try:
                     doc = self.cursor.next()
-                    if doc['write'] != "device":
-                        self.write_message(str(doc))
+                    if doc['write'] != self.side:
+                        self.write_message(doc)
                 except StopIteration:
                     time.sleep(2) 
         eventinject[self]=thread.start_new_thread(run, ()) 
@@ -167,6 +168,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if opinfo['method'] == "put":
             mongo.addDeviceStatus(self.device,opinfo["status"])
             self.write_message(u"from server added to database")
+        elif opinfo['method']=="gets":
+            self.write_message(mongo.getDeviceStatus(self.device,opinfo['sensor']))
         else:
             print "[fail]methods are not executed"
     def on_close(self):

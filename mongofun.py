@@ -5,6 +5,13 @@ from bson.objectid import ObjectId
 import random
 import string
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
+
 class MongoFun:
    
     def __init__(self):
@@ -64,24 +71,32 @@ class MongoFun:
     def verifyUser(self,uname,pword):
         """ verify thae user with two parameter 1.username 2.password
         and if password is correct for username than return id if wrong retrun 0"""
-        userinfo=self.db['users'].find({"email":uname})
-        for document in userinfo:
-            if document['email']==uname and document['pass']==pword:
-                return document['_id']
-            else:
-                return "nid"
+        userinfo=self.db['users'].find_one({"email":uname,"pass":pword})
+        if userinfo == None:
+            return str(userinfo["_id"])
+        else:
+            return "nid"
 
 
     def addDeviceStatus(self,device,status):
         """this function is add status to database when user submit data in websocket connection"""
         self.db[device].insert(status,safe=True)  
 
+    def getDeviceStatus(self,device,sensor):
+        """get you a last status about the sensor"""
+        status= self.db[device].find({"sensor":sensor}).limit(1).sort([["time",pymongo.DESCENDING]])
+        for stat in status:
+            del stat["_id"]
+            return json.dumps(stat)
+            break
+
     def randomGen(self,size,chars=string.ascii_uppercase+string.digits):
         return ''.join(random.choice(chars) for x in range(size))
 
     def listDevices(self,id):
         userinfo=self.db['users'].find_one({"_id":ObjectId(id)})
-        return userinfo['devices']
+        del userinfo["_id"]
+        return json.dumps(userinfo['devices'])
 
         
 

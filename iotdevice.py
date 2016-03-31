@@ -26,9 +26,9 @@ def on_open(ws):
                 ws.send(query)
                 info=False
             else:
-                value=int(raw_input('enter value of temp=>'))
-                sensor=raw_input('enter sensor id=>')
-                write=raw_input('enter sign=>')
+                value=int(raw_input('enter value of sensor=>\n'))
+                sensor=raw_input('enter sensor id=>\n')
+                write="device"
                 query=str(writebysign(write,sensor,value))
 
 
@@ -38,7 +38,7 @@ def on_open(ws):
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
     websocket.enableTrace(False)
-    host = "ws://localhost:8888/ws?device=MBIJ0R5BGXBDSYO0GIIE&key=SQC8JVFAL8NQRJS"
+    host = "ws://localhost:8888/ws?device=MBIJ0R5BGXBDSYO0GIIE&key=SQC8JVFAL8NQRJS&side=device"
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()
