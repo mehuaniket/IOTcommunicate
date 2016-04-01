@@ -37,7 +37,9 @@ def on_close(ws):
     print "[notify] connection closed"
 
 def on_open(ws):
+    ws.send("{\"method\":\"gets\",\"sensor\":\"tv\"}")
     ws.send("{\"method\":\"gets\",\"sensor\":\"temp\"}")
+    ws.send("{\"method\":\"gets\",\"sensor\":\"led\"}")
     def run(*args):
         global query
         global info
@@ -51,9 +53,6 @@ def on_open(ws):
                 sensor=raw_input('enter sensor id=>\n')
                 write="device"
                 query=writebysign(write,sensor,value)
-
-
-            time.sleep(5)
         ws.close()
         print("[notify] Thread terminating")
     thread.start_new_thread(run, ())

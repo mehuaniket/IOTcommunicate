@@ -52,7 +52,7 @@ def on_open(ws):
                 query=writebysign(write,sensor,value)
 
 
-            time.sleep(5)
+ 
         ws.close()
         print("[notify] Thread terminating")
     thread.start_new_thread(run, ())
