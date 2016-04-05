@@ -38,7 +38,7 @@ class MainHandler(BaseHandler):
 
 class CreateHandler(BaseHandler):
     '''handler that create new devices with only by passing name in argument'''
-    # mongo=MongoFun()
+
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -67,7 +67,7 @@ class LogoutHandler(BaseHandler):
 
 class LoginHandler(BaseHandler):
     '''login handler'''
-    # mongo=MongoFun()
+    
     def get(self):
         if self.current_user:
             self.redirect("/")
@@ -90,7 +90,7 @@ class LoginHandler(BaseHandler):
 
 class MydeviceHandler(BaseHandler):
     '''my devices give list of devices that you created'''
-    # mongo=MongoFun()
+
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -102,7 +102,7 @@ class MydeviceHandler(BaseHandler):
 
 class DocsHandler(BaseHandler):
     '''provide docs to user'''
-    # mongo=MongoFun()
+
     @tornado.web.authenticated
     def get(self):
         if not self.current_user:
@@ -114,7 +114,7 @@ class DocsHandler(BaseHandler):
 
 class  signUpHandler(tornado.web.RequestHandler):
 
-    mongo=MongoFun()
+
     def get(self):
         self.render('signup.html')
 
@@ -132,7 +132,7 @@ class  signUpHandler(tornado.web.RequestHandler):
         
 class WSHandler(tornado.websocket.WebSocketHandler):
 
-    # mongo=MongoFun()
+
     def open(self):
         global mongo
         global clients
@@ -206,7 +206,6 @@ application = tornado.web.Application(handlers=[
     (r'/mydevices', MydeviceHandler),
     (r'/signup', signUpHandler)
 ],**settings)
-
 
 if __name__ == "__main__":
     http_server = tornado.httpserver.HTTPServer(application)
