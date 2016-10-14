@@ -17,7 +17,7 @@ class MongoFun:
             sys.stderr.write("could not connect to MongoDb:%s"%e)
             sys.exit(1)   
         self.db = self.conn['IOT']
-        assert self.db.connection == self.conn
+        
     
     def FetchDbNames(self):
         """this function giving you all database name"""
