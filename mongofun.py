@@ -7,23 +7,23 @@ import random
 import string
 
 class MongoFun:
-   
+
     def __init__(self):
         """this function making connection to database"""
-        
+
         try:
             self.conn = MongoClient('mongodb://localhost:27017/')
         except ConnectionFailure,e:
             sys.stderr.write("could not connect to MongoDb:%s"%e)
-            sys.exit(1)   
+            sys.exit(1)
         self.db = self.conn['IOT']
-        
-    
+
+
     def FetchDbNames(self):
         """this function giving you all database name"""
 
         return self.conn.database_names()
-    
+
     def SwitchDb(self,database):
         """this function is switching connection of database one-to other"""
 
@@ -34,7 +34,7 @@ class MongoFun:
         """this database give you database collection names and that is really important"""
 
         return self.db.collection_names()
-     
+
     def addUser(self,userData):
         """this function is used when we have to insert new user"""
 
@@ -51,14 +51,14 @@ class MongoFun:
         self.db['users'].update({"_id":ObjectId(id)},{"$push":{"devices":DeviceData}})
         self.db.create_collection(DeviceData['deviceid'],size=1000000,max=100,capped=True)
         fakeData={"sensor":"temp","value":20}
-        self.db[DeviceData['deviceid']].insert(fakeData,safe=True)     
+        self.db[DeviceData['deviceid']].insert(fakeData,safe=True)
 
     def verifyDevice(self,deviceid,devicekey):
 
         """function taking key and id as argument and if match than return true"""
 
         document=self.db['users'].find_one({"devices":{"$elemMatch":{"deviceid": deviceid,"devicekey":devicekey}}})
- 
+
         if document:
             return 1
         else:
@@ -73,18 +73,22 @@ class MongoFun:
         """ verify thae user with two parameter 1.username 2.password
         and if password is correct for username than return id if wrong retrun 0"""
 
-        userinfo=self.db['users'].find({"email":uname})
-        for document in userinfo:
-            if document['email']==uname and document['pass']==pword:
+        userinfo=self.db['users'].find_one({"email":uname})
+        if userinfo is not None:
+            document=userinfo
+            if document['email']==uname and document['pass']==pword :
+                print "document id",document['_id']
                 return document['_id']
-            else:
-                return "nid"
+        else:
+            return None
+
+
 
 
     def addDeviceStatus(self,device,status):
-        """this function is add status to database when user submit data 
+        """this function is add status to database when user submit data
            in websocket connection"""
-        self.db[device].insert(status,safe=True)  
+        self.db[device].insert(status,safe=True)
 
     def getDeviceStatus(self,device,sensor):
         """get you a last status about the sensor"""
@@ -102,19 +106,20 @@ class MongoFun:
 
     def listDevices(self,id):
         userinfo=self.db['users'].find_one({"_id":ObjectId(id)})
-        return userinfo['devices']
+        if userinfo is not None:
+            return userinfo['devices']
 
-        
 
-    
+
+
 if __name__ == '__main__':
     """this is for testing function and all 'coz i hate unit testing """
     #test class __init__
     mongofun=MongoFun()
-    
+
     #test FetchDbNames function
     print mongofun.FetchDbNames()
-    
+
     #test GetCollection function
     print mongofun.GetCollection()
 
@@ -125,7 +130,7 @@ if __name__ == '__main__':
               "devices":[]
              }
     mongofun.addUser(userData)
-    
+
     #test addDevice Function that add new device in users after genrating id and key
     #we genrate key here not programatically ,manuallly each key has 15 chars [alphanumeric]
     DeviceData={"deviceid":"1wWaItGHJ91EBngTHXet","devicekey":"aTijWhDFbcvDH146fdgr"}
@@ -137,7 +142,3 @@ if __name__ == '__main__':
     #test of function addDeviceStatus
     statusdata={"sensor":"temp","value":20,"write":"device"}
     mongofun.addDeviceStatus("1wWaItGHJ91EBngTHXet",statusdata)
-    
-    
-    
-    
