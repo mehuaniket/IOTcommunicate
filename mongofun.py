@@ -38,7 +38,7 @@ class MongoFun:
     def addUser(self,userData):
         """this function is used when we have to insert new user"""
 
-	self.db['users'].insert(userData,safe=True)
+	    self.db['users'].insert(userData,safe=True)
         print "user is successfully inserted"
 
     def addDevice(self,id,DeviceData):
