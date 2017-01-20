@@ -50,7 +50,7 @@ class MongoFun:
         self.db['users'].update({"_id":ObjectId(id)},{"$push":{"devices":DeviceData}})
         self.db.create_collection(DeviceData['deviceid'],size=1000000,max=100,capped=True)
         fakeData={"sensor":"temp","value":20}
-        self.db[DeviceData['deviceid']].insert(fakeData,safe=True)
+        self.db[DeviceData['deviceid']].insert(fakeData)
         return
 
     def verifyDevice(self,deviceid,devicekey):
