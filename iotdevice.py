@@ -53,7 +53,7 @@ def on_open(ws):
 
 
  
-        ws.close()
+        #ws.close()
         print("[notify] Thread terminating")
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
