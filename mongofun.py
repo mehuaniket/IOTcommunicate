@@ -29,17 +29,16 @@ class MongoFun:
 
         self.db=self.conn[database]
         print "you are currently on ",database
+        return
 
     def GetCollection(self):
         """this database give you database collection names and that is really important"""
-
         return self.db.collection_names()
 
     def addUser(self,userData):
-        """this function is used when we have to insert new user"""
-
-	    self.db['users'].insert(userData,safe=True)
-        print "user is successfully inserted"
+         self.db.users.insert(userData,safe=True)
+         print "user is successfully inserted"
+         return
 
     def addDevice(self,id,DeviceData):
         """function take 2 arguments email or id and DaviceData that genrated on main file
@@ -52,6 +51,7 @@ class MongoFun:
         self.db.create_collection(DeviceData['deviceid'],size=1000000,max=100,capped=True)
         fakeData={"sensor":"temp","value":20}
         self.db[DeviceData['deviceid']].insert(fakeData,safe=True)
+        return
 
     def verifyDevice(self,deviceid,devicekey):
 
@@ -88,7 +88,8 @@ class MongoFun:
     def addDeviceStatus(self,device,status):
         """this function is add status to database when user submit data
            in websocket connection"""
-        self.db[device].insert(status,safe=True)
+        self.db[device].insert(status)
+        return
 
     def getDeviceStatus(self,device,sensor):
         """get you a last status about the sensor"""
