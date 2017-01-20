@@ -58,7 +58,7 @@ def on_open(ws):
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
     websocket.enableTrace(False)
-    host = "ws://localhost/ws?device=MBIJ0R5BGXBDSYO0GIIE&key=SQC8JVFAL8NQRJS&side=device"
+    host = "ws://35.164.228.234/ws?device=BU08USL37BPHPL87Q5B2&key=RNF6OOGNDZAXJLY&side=device"
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()
