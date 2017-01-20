@@ -36,7 +36,7 @@ class MongoFun:
         return self.db.collection_names()
 
     def addUser(self,userData):
-         self.db.users.insert(userData,safe=True)
+         self.db.users.insert(userData)
          print "user is successfully inserted"
          return
 
