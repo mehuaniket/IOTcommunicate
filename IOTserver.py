@@ -1,20 +1,20 @@
+import socket
+import time
+import json
+import os
+import thread
+
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
 
-import socket
-import time
-import json
-import os
 
 import pymongo
 from pymongo import MongoClient
 from mongofun import MongoFun
-from bson.objectid import ObjectId
 
-import thread
-import time
+
 
 clients = []
 eventinject = {}
@@ -22,7 +22,7 @@ eventinject = {}
 '''
 This is a file that handle is main in IOT communicate project
 '''
-mongo = MongoFun()
+MONGO = MongoFun()
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -51,17 +51,18 @@ class CreateHandler(BaseHandler):
         if not self.current_user:
             self.redirect("/login")
             return
-        user = tornado.escape.xhtml_escape(self.current_user)
+       # user = tornado.escape.xhtml_escape(self.current_user)
         self.render("newdevice.html")
 
     def post(self):
-        global mongo
+        global MONGO
         self.id = self.current_user
         self.dname = self.get_argument('dname', True)
-        self.did = mongo.randomGen(size=20)
-        self.dkey = mongo.randomGen(size=15)
-        DeviceData = {"name": self.dname, "deviceid": self.did, "devicekey": self.dkey}
-        mongo.addDevice(self.id, DeviceData)
+        self.did = MONGO.randomGen(size=20)
+        self.dkey = MONGO.randomGen(size=15)
+        DeviceData = {"name": self.dname,
+                      "deviceid": self.did, "devicekey": self.dkey}
+        MONGO.addDevice(self.id, DeviceData)
         self.redirect("/mydevices")
 
 
@@ -83,14 +84,14 @@ class LoginHandler(BaseHandler):
         self.render("login.html")
 
     def post(self):
-        global mongo
+        global MONGO
         self.uname = self.get_argument('uname', True)
         self.pword = self.get_argument('pword', True)
         print "[notify]login from", self.uname
-        id = mongo.verifyUser(self.uname, self.pword)
+        id = MONGO.verifyUser(self.uname, self.pword)
         print "[info]user loggedin", str(id)
 
-        if id == None:
+        if id is None:
             self.render("login.html")
         else:
             self.set_secure_cookie("user", str(id))
@@ -106,7 +107,7 @@ class MydeviceHandler(BaseHandler):
             self.redirect("/login")
             return
         self.id = tornado.escape.xhtml_escape(self.current_user)
-        devicelist = mongo.listDevices(self.id)
+        devicelist = MONGO.listDevices(self.id)
         self.render("home.html", mydevices=devicelist)
 
 
@@ -123,22 +124,25 @@ class DocsHandler(BaseHandler):
 
 
 class signUpHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.render('signup.html')
 
     def post(self):
-        global mongo
+        global MONGO
         self.name = self.get_argument('name', True)
         self.email = self.get_argument('email', True)
         self.pword = self.get_argument('pword', True)
-        userData = {"name": self.name, "email": self.email, "pass": self.pword, "devices": []}
-        mongo.addUser(userData)
+        userdata = {"name": self.name, "email": self.email,
+                    "pass": self.pword, "devices": []}
+        MONGO.addUser(userdata)
         self.redirect("/login")
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
+
     def open(self):
-        global mongo
+        global MONGO
         global clients
 
         clients.append(self)
@@ -146,23 +150,24 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.key = self.get_argument('key', True)
         self.side = self.get_argument('side', True)
         print "[notify]connection established", self.device
-        print "[notify]from function in mongodbveriy", mongo.verifyDevice(self.device, self.key)
-        if mongo.verifyDevice(self.device, self.key) is 0:
+        print "[notify]from function in mongodbveriy", MONGO.verifyDevice(self.device, self.key)
+        if MONGO.verifyDevice(self.device, self.key) is 0:
             self.close()
         self.conn = MongoClient('mongodb://localhost:27017/')
         self.db = self.conn['IOT']
         self.coll = self.db[self.device]
-        print "connection established"
-        self.cursor = self.coll.find({"time": {"$gt": time.time()}}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+        print "[notify]connection established"
+        self.cursor = self.coll.find(
+            {"time": {"$gt": time.time()}}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
 
-        self.write_message("conn opened")
         def run(*args):
+            """it will run in background check for device update,if found then 
+            sned it to respective device or client"""
             while self.cursor.alive:
                 try:
                     doc = self.cursor.next()
                     del doc["_id"]
                     if doc["write"] != self.side:
-                        self.write_message("\n========from server========\n")
                         self.write_message(json.dumps(doc))
                 except StopIteration:
                     time.sleep(2)
@@ -172,17 +177,16 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
 
         opinfo = json.loads(message)
-
         print "[info]message received from", self.device
         if opinfo['method'] == "put":
             opinfo["status"]["time"] = time.time()
             opinfo["status"]["write"] = self.side
-            mongo.addDeviceStatus(self.device, opinfo["status"])
-            self.write_message(u"from server added to database")
+            MONGO.addDeviceStatus(self.device, opinfo["status"])
 
         elif opinfo['method'] == "gets":
 
-            self.write_message(mongo.getDeviceStatus(self.device, opinfo['sensor']))
+            self.write_message(MONGO.getDeviceStatus(
+                self.device, opinfo['sensor']))
 
         else:
 
@@ -194,7 +198,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print("[notify]WebSocket closed")
 
 
-settings = {
+SETTINGS = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "cookie_secret": "djbffdjgbkfdjsbgrkgkjtbrgbbfiurbt",
@@ -212,11 +216,11 @@ application = tornado.web.Application(handlers=[
     (r'/create', CreateHandler),
     (r'/mydevices', MydeviceHandler),
     (r'/signup', signUpHandler)
-], **settings)
+], **SETTINGS)
 
 if __name__ == "__main__":
-    http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(80)
-    myIP = socket.gethostbyname(socket.gethostname())
-    print '*** Websocket Server Started at %s***' % myIP
+    Http_server = tornado.httpserver.HTTPServer(application)
+    Http_server.listen(80)
+    myip = socket.gethostbyname(socket.gethostname())
+    print '*** Websocket Server Started at %s***' % myip
     tornado.ioloop.IOLoop.instance().start()

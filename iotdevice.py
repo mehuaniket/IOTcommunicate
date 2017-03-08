@@ -52,13 +52,13 @@ def on_open(ws):
                 query=writebysign(write,sensor,value)
 
 
- 
+
         #ws.close()
         print("[notify] Thread terminating")
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
     websocket.enableTrace(False)
-    host = "ws://35.164.228.234/ws?device=BU08USL37BPHPL87Q5B2&key=RNF6OOGNDZAXJLY&side=device"
+    host = "ws://127.0.0.7/ws?device=L1SEIUDU1MC996W48L8Q&key=FY6ODPIVU522SY1&side=device"
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()
