@@ -177,19 +177,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
 
         opinfo = json.loads(message)
-        print "[info]message received from", self.device
+        print "[info]message received from", self.device,self.side
         if opinfo['method'] == "put":
             opinfo["status"]["time"] = time.time()
             opinfo["status"]["write"] = self.side
             MONGO.addDeviceStatus(self.device, opinfo["status"])
 
-        elif opinfo['method'] == "gets":
+        elif opinfo['method'] == "get":
 
             self.write_message(MONGO.getDeviceStatus(
                 self.device, opinfo['sensor']))
 
         else:
-
             print "[fail]methods are not executed"
 
     def on_close(self):
