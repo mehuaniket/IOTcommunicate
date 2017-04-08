@@ -184,7 +184,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             MONGO.addDeviceStatus(self.device, opinfo["status"])
 
         elif opinfo['method'] == "get":
-
             self.write_message(MONGO.getDeviceStatus(
                 self.device, opinfo['sensor']))
 
