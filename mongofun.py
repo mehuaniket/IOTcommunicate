@@ -95,10 +95,12 @@ class MongoFun:
         """get you a last status about the sensor"""
 
         status= self.db[device].find({"sensor":sensor}).limit(1).sort([["time",pymongo.DESCENDING]])
-        for stat in status:
-            del stat["_id"]
-            return json.dumps(stat)
-            break
+        if status is not None:
+            for stat in status:
+                del stat["_id"]
+                return json.dumps(stat)
+                break
+        return "{}"
 
     def randomGen(self,size,chars=string.ascii_uppercase+string.digits):
         """this function give randomize keys size that you passed to it"""
