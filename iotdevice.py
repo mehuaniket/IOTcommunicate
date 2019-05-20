@@ -49,6 +49,7 @@ def on_open(ws):
                 value=raw_input('enter value of sensor=>\n')
                 sensor=raw_input('enter sensor id=>\n')
                 write="device"
+                info=True
                 query=writebysign(write,sensor,value)
 
 
@@ -58,7 +59,7 @@ def on_open(ws):
     thread.start_new_thread(run, ())
 if __name__ == "__main__":
     websocket.enableTrace(False)
-    host = "ws://127.0.0.7/ws?device=L1SEIUDU1MC996W48L8Q&key=FY6ODPIVU522SY1&side=device"
+    host = "ws://127.0.0.7/ws?device=CJUQITVIVSXXG3FKSMSL&key=7HSZJU1CTYCZ79K&side=device"
     ws = websocket.WebSocketApp(host,on_message = on_message,on_error = on_error,on_close = on_close)
     ws.on_open = on_open
     ws.run_forever()

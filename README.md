@@ -48,6 +48,11 @@ ws://localhost:8888/ws?device=MBIJ0R5BGXBDSYO0GIIE&key=SQC8JVFAL8NQRJS
 $ pip install pymongo
 $ pip install tornado
 ```
+
+```bash
+pip install -r requirement.txt
+```
+
 - after this step you can directly run IOTserver.py by typing following command:
 ```bash
 sudo python IOTserver.py

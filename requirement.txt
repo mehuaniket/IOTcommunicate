@@ -1,0 +1,9 @@
+backports-abc==0.5
+futures==3.2.0
+gevent==1.4.0
+greenlet==0.4.15
+pymongo==3.8.0
+singledispatch==3.4.0.3
+six==1.12.0
+tornado==5.1.1
+websocket-client==0.56.0
